@@ -12,6 +12,7 @@ class Cyclic:
 
     __COLOR_CHANGE_FREQ = 0.05
     __MAX_STATE_REPETITIONS_FOR_GAME_OVER = 10
+    __TIMEOUT = 60
 
     palettes = vars(pifi.games.palette)
 
@@ -70,6 +71,8 @@ class Cyclic:
         return hashlib.md5(self.__board).hexdigest()
 
     def __is_game_over(self):
+        if time.time() - self.__started > self.__TIMEOUT:
+            return True
         if self.__prev_board_state_counts[self.__get_board_hash()] > self.__MAX_STATE_REPETITIONS_FOR_GAME_OVER:
             self.__logger.info(("Game over detected. Current board state has repeated at least {} times."
                     .format(self.__MAX_STATE_REPETITIONS_FOR_GAME_OVER)))
@@ -78,6 +81,7 @@ class Cyclic:
 
     def __reset(self):
         self.__logger.info("Starting new game.")
+        self.__started = time.time()
         self.__num_ticks = 0
         self.__game_color_helper.reset()
         self.__game_color_mode = self.__game_color_helper.determine_game_color_mode(self.__settings)
